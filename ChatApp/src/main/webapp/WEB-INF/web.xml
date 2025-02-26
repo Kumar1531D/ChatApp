@@ -1,0 +1,37 @@
+<!DOCTYPE web-app PUBLIC
+ "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+ "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app>
+  <display-name>Archetype Created Web Application</display-name>
+  <servlet>
+  	<servlet-name>LoginServlet</servlet-name>
+  	<display-name>LoginServlet</display-name>
+  	<description></description>
+  	<servlet-class>com.chatapp.login.LoginServlet</servlet-class>
+  </servlet>
+  <servlet>
+  	<servlet-name>SignUpServlet</servlet-name>
+  	<display-name>SignUpServlet</display-name>
+  	<description></description>
+  	<servlet-class>com.chatapp.login.SignUpServlet</servlet-class>
+  </servlet>
+  <servlet>
+  	<servlet-name>ChatServlet</servlet-name>
+  	<display-name>ChatServlet</display-name>
+  	<description></description>
+  	<servlet-class>com.chatapp.dao.ChatServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>LoginServlet</servlet-name>
+  	<url-pattern>/LoginServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>SignUpServlet</servlet-name>
+  	<url-pattern>/SignUpServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>ChatServlet</servlet-name>
+  	<url-pattern>/ChatServlet</url-pattern>
+  </servlet-mapping>
+</web-app>

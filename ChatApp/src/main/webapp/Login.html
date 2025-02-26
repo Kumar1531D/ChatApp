@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login & Signup</title>
+<link rel="stylesheet" href="login.css">
+</head>
+<body>
+	<div class="container">
+		<div class="form-box">
+			<h2 id="form-title">Login</h2>
+			<form id="auth-form">
+				<div class="input-group">
+					<label for="email">Email</label> <input type="email" id="email"
+						required>
+				</div>
+				<div class="input-group">
+					<label for="password">Password</label> <input type="password"
+						id="password" required>
+				</div>
+				<div class="input-group" id="name-group" style="display: none;">
+					<label for="username">Username</label> <input type="text"
+						id="username">
+				</div>
+				<button type="submit" onclick="login()">Submit</button>
+			</form>
+			<p id="toggle-text">
+				Don't have an account? <a href="#" id="toggle-btn">Sign Up</a>
+			</p>
+		</div>
+	</div>
+
+	<script>
+        const toggleBtn = document.getElementById('toggle-btn');
+        const formTitle = document.getElementById('form-title');
+        const authForm = document.getElementById('auth-form');
+        const nameGroup = document.getElementById('name-group');
+        const toggleText = document.getElementById('toggle-text');
+        
+        let isLogin = true;
+        toggleBtn.addEventListener('click', () => {
+            isLogin = !isLogin;
+            formTitle.textContent = isLogin ? 'Login' : 'Sign Up';
+            nameGroup.style.display = isLogin ? 'none' : 'block';
+            toggleText.innerHTML = isLogin 
+                ? "Don't have an account? <a href='#' id='toggle-btn'>Sign Up</a>"
+                : "Already have an account? <a href='#' id='toggle-btn'>Login</a>";
+        });
+        
+        function login(){
+	        let username = document.getElementById("email").value;
+	        let pass = document.getElementById("password").value;
+	        
+	        if(isLogin){
+	        	fetch('/ChatApp/login', {
+	        		method: 'POST',
+	        		headers: { 'Content-Type': 'application/json' },
+	        		body: JSON.stringify({ userName: username, password: pass})
+	        	})
+		        .then(response => {
+			        if (!response.ok) {
+			            throw new Error("Network response was not ok");
+			        }
+			        return response.json();
+			    })
+	        	.then(data=>{
+	        		if(data.access==="ok"){
+	        			sessionStorage.setItem("username", username);
+	        			sessionStorage.setItem("jwt", data.jwt);
+	        			window.location.href = "Home.html";
+	        		}
+	        		else{
+	        			alert("User details wrong")
+	        		}
+	        	})
+	        	.catch(error => console.error("Fetch error:", error));
+	        }
+	        else{
+	            let e = document.getElementById('email').value;
+	            
+	            fetch('/ChatApp/signup', {
+	        		method: 'POST',
+	        		headers: { 'Content-Type': 'application/json' },
+	        		body: JSON.stringify({ userName: username, password: pass,email:e})
+	        	})
+	        	.then(response => {
+			        if (!response.ok) {
+			            throw new Error("Network response was not ok");
+			        }
+			        return response.json();
+			    })
+			    .then(data=>{
+			    	if(data.access==="ok"){
+	        			sessionStorage.setItem("username", username);
+	        			window.location.href = "Login.html";
+	        		}
+	        		else{
+	        			alert("Username already in use");
+	        		}
+			    })
+			    .catch(error => console.error("Fetch error: ",error));
+	        }
+        }
+        
+        
+    </script>
+</body>
+</html>
