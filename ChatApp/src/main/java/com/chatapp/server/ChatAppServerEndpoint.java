@@ -27,7 +27,7 @@ public class ChatAppServerEndpoint {
 	
 	private static final String JDBC_URL = "jdbc:mysql://localhost:3306/chatApp";
 	private static final String JDBC_USER = "root";
-	private static final String JDBC_PASS = "Kumar_1531.,";
+	private static final String JDBC_PASS = "sabari";
 	private static Map<String,Session> activeUsers = new ConcurrentHashMap();
 	
 	@OnOpen
@@ -74,7 +74,6 @@ public class ChatAppServerEndpoint {
 					e.printStackTrace();
 				}
 			}
-			
 		}
 		else if (type.equals("group")) {
 	        // Send message to all group members
@@ -83,6 +82,9 @@ public class ChatAppServerEndpoint {
 	        int groupId = msgData.getInt("groupId");
 	        sendGroupMessage(groupId, msgData);
 	    }
+		else if (type.equals("offer") || type.equals("answer") || type.equals("ice-candidate")) {
+            handleVideoCall(msgData);
+        }
 		
 	}
 	
@@ -137,6 +139,23 @@ public class ChatAppServerEndpoint {
 	    
 	    return members;
 	}
+	
+	private void handleVideoCall(JSONObject jsonMessage) {
+	    String receiver = jsonMessage.getString("receiver");
+	    //String sender = jsonMessage.getString("sender");
+
+	    Session receiverSession = activeUsers.get(receiver); // Find recipient's session
+	    if (receiverSession != null && receiverSession.isOpen()) {
+	        try {
+	            receiverSession.getBasicRemote().sendText(jsonMessage.toString());
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	    } else {
+	        System.out.println("Receiver not online: " + receiver);
+	    }
+	}
+
 
 
 }

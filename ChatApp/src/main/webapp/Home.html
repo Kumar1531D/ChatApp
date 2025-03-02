@@ -101,6 +101,11 @@ button {
     justify-content: space-between;
 }
 
+#group {
+    display: flex;
+    justify-content: space-between;
+}
+
 .button-29 {
     align-items: center;
     background-image: radial-gradient(100% 100% at 100% 0, #5adaff 0, #5468ff 100%);
@@ -122,6 +127,105 @@ button {
     box-shadow: rgba(45, 35, 66, .4) 0 4px 8px, rgba(45, 35, 66, .3) 0 7px 13px -3px, #3c4fe0 0 -3px 0 inset;
     transform: translateY(-2px);
 }
+
+.menu-button {
+    border: none;
+    background: none;
+    font-size: 20px;
+    cursor: pointer;
+    margin-left: 10px;
+    color: #555;
+    padding: 5px;
+}
+
+.menu-button:hover {
+    color: #222;
+}
+
+.group-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-radius: 8px;
+    background: #f8f8f8;
+    margin-bottom: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.group-menu {
+    position: absolute;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    z-index: 10;
+    width: 150px;
+}
+
+.group-menu div {
+    padding: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+}
+
+.group-menu div:hover {
+    background: #007bff;
+    color: white;
+    border-radius: 4px;
+}
+
+#videoCallButton {
+        cursor: pointer;
+        border: none;
+        background: #28a745;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+
+    #videoCallModal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    #videoContainer {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    video {
+        width: 300px;
+        height: 200px;
+        background: black;
+        border-radius: 5px;
+    }
+
+    #hangUpButton {
+        display: block;
+        width: 100%;
+        margin-top: 10px;
+        background: red;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+
 </style>
 </head>
 <body>
@@ -132,8 +236,11 @@ button {
         <button class="button-29" role="button" onclick="addFriend()">Add Friend</button>
     </div>
     <div id="friend-list"></div>
-
+	<br>
+	<div id="group"> 
     <h3>Groups</h3>
+    <button class="button-29" role="button" onclick="addGroup()">Create Group</button>
+    </div>
     <div id="group-list"></div>
 </div>
 
@@ -144,6 +251,12 @@ button {
         <button onclick="sendMessage()">Send</button>
     </div>
 </div>
+<div id="video-call-container" style="display: none;">
+    <video id="localVideo" autoplay muted></video>
+    <video id="remoteVideo" autoplay></video>
+    <button onclick="endCall()">End Call</button>
+</div>
+<button id="startCallBtn">📞 Start Video Call</button>
 
 <script src="Home.js"></script>
 

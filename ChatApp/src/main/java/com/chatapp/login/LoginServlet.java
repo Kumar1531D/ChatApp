@@ -24,7 +24,7 @@ public class LoginServlet extends HttpServlet {
 	
 	private static final String JDBC_URL = "jdbc:mysql://localhost:3306/chatApp";
     private static final String JDBC_USER = "root"; 
-    private static final String JDBC_PASS = "Kumar_1531.,";
+    private static final String JDBC_PASS = "sabari";
 	
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		

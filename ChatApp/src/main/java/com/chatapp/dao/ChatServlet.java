@@ -28,7 +28,7 @@ public class ChatServlet extends HttpServlet {
 	
 	private static final String JDBC_URL = "jdbc:mysql://localhost:3306/chatApp";
 	private static final String JDBC_USER = "root";
-	private static final String JDBC_PASS = "Kumar_1531.,";
+	private static final String JDBC_PASS = "sabari";
 	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try {
@@ -124,7 +124,6 @@ public class ChatServlet extends HttpServlet {
 			    int groupId = Integer.parseInt(request.getParameter("groupId"));
 			    List<Message> messages = getGroupMessages(groupId);
 
-			    // Convert list to JSON
 			    String json = new Gson().toJson(messages);
 			    response.setContentType("application/json");
 			    response.getWriter().write(json);
@@ -200,6 +199,96 @@ public class ChatServlet extends HttpServlet {
 				
 				
 			}
+			else if (action.equals("insertGroupMsg")) {
+				Connection con = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASS);
+				
+				String msg = requestedData.getString("msg");
+				String sender = requestedData.getString("sender");
+				int groupId = requestedData.getInt("groupId");
+				
+				String qry = "insert into group_messages(group_id,sender_id,message,timestamp) values(?,(select id from loginInfo where user_name=?),?,now());";
+				
+				PreparedStatement p = con.prepareStatement(qry);
+				p.setInt(1, groupId);
+				p.setString(2, sender);
+				p.setString(3, msg);
+				
+				p.executeUpdate();
+				
+				con.close();
+				p.close();
+			}
+			else if (action.equals("addMember")) {
+				Connection con = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASS);
+				
+				String memberName = requestedData.getString("memberName");
+				int groupId = requestedData.getInt("groupId");
+				
+				String qry = "insert into group_members(group_id,user_id) values(?,(select id from loginInfo where user_name=?));";
+				
+				PreparedStatement p = con.prepareStatement(qry);
+				p.setInt(1, groupId);
+				p.setString(2, memberName);
+				
+				p.executeUpdate();
+				
+				JSONObject responseData = new JSONObject();
+				
+				responseData.put("message", "Member added successfully");
+				
+				response.setContentType("application/json");
+			    response.getWriter().write(responseData.toString());
+				
+				con.close();
+				p.close();
+			}
+			else if (action.equals("removeMember")) {
+				Connection con = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASS);
+				
+				String memberName = requestedData.getString("memberName");
+				int groupId = requestedData.getInt("groupId");
+				
+				String qry = "delete from group_members where group_id=? and user_id=(select id from loginInfo where user_name=?);";
+				
+				PreparedStatement p = con.prepareStatement(qry);
+				p.setInt(1, groupId);
+				p.setString(2, memberName);
+				
+				p.executeUpdate();
+				
+				JSONObject responseData = new JSONObject();
+				
+				responseData.put("message", "Member removed successfully");
+				
+				response.setContentType("application/json");
+			    response.getWriter().write(responseData.toString());
+				
+				con.close();
+				p.close();
+			}
+			else if (action.equals("insertGroup")) {
+				Connection con = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASS);
+				
+				String gName = requestedData.getString("gName");
+				String uName = requestedData.getString("creator");
+				
+				String qry = "insert into group_table(group_name,created_by,created_at) values(?,(select id from loginInfo where user_name=?),now());";
+				PreparedStatement p = con.prepareStatement(qry);
+				p.setString(1, gName);
+				p.setString(2, uName);
+				
+				p.executeUpdate();
+				
+				qry = "insert into group_members(group_id,user_id) values((select id from group_table where group_name=?),(select id from loginInfo where user_name=?));\r\n";
+				p = con.prepareStatement(qry);
+				p.setString(1, gName);
+				p.setString(2, uName);
+				
+				p.executeUpdate();
+				
+				con.close();
+				p.close();
+			}
 		}catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -209,10 +298,11 @@ public class ChatServlet extends HttpServlet {
 	
 	public List<Group> getUserGroups(String userName) {
 	    List<Group> groups = new ArrayList<>();
-	    String query = "SELECT g.id, g.group_name FROM group_table g " +
-	                   "JOIN group_members gm ON g.id = gm.group_id " +
-	                   "JOIN loginInfo l ON gm.user_id = l.id " +
-	                   "WHERE l.user_name = ?";
+	    String query = "SELECT g.id, g.group_name,l1.user_name as created_by FROM group_table g "
+	    		+ "	                   JOIN group_members gm ON g.id = gm.group_id "
+	    		+ "	                   JOIN loginInfo l ON gm.user_id = l.id "
+	    		+ "                    JOIN loginInfo l1 on l1.id=g.created_by "
+	    		+ "	                   WHERE l.user_name = ?;";
 
 	    try (Connection con = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASS);
 	         PreparedStatement ps = con.prepareStatement(query)) {
@@ -221,7 +311,7 @@ public class ChatServlet extends HttpServlet {
 	        ResultSet rs = ps.executeQuery();
 	        
 	        while (rs.next()) {
-	            groups.add(new Group(rs.getInt("id"), rs.getString("group_name")));
+	            groups.add(new Group(rs.getInt("id"), rs.getString("group_name"),rs.getString("created_by")));
 	        }
 	    } catch (SQLException e) {
 	        e.printStackTrace();
