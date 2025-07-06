@@ -6,16 +6,6 @@ let selectedGroupId = null;
 let selectedGroupName = null;
 
 let peerConnection = null; // Declare globally
-const iceServers = {
-	iceServers: [
-		{ urls: "stun:stun.l.google.com:19302" }, // STUN Server
-		{
-			"urls": "turn:relay1.expressturn.com:3478",
-			"username": "efk123",
-			"credential": "efkpassword"
-		}
-	]
-};
 
 ws.onmessage = async (event) => {
 	const messageData = JSON.parse(event.data);
@@ -33,101 +23,12 @@ ws.onmessage = async (event) => {
 		displayMessage(messageData.sender, messageData.message, false);
 		console.log("in private");
 	}
-	else if (messageData.type === "offer") {
-		handleOffer(messageData.offer, messageData.sender);
-	} else if (messageData.type === "answer") {
-		if (peerConnection) {
-			peerConnection.setRemoteDescription(new RTCSessionDescription(message.answer));
-		}
-	} else if (messageData.type === "ice-candidate") {
-		if (peerConnection) {
-			handleICECandidate(message);
-		} else {
-			console.warn("peerConnection is not ready. Ignoring ICE candidate.");
-		}
-	} else {
+	 else {
 		showNotificationDot(messageData.sender);
 	}
 };
 
 let localStream;
-
-function startCall() {
-	if (!peerConnection) {
-		peerConnection = new RTCPeerConnection(iceServers);
-
-		peerConnection.onicecandidate = (event) => {
-			if (event.candidate) {
-				sendMessage({ type: "ice-candidate", candidate: event.candidate });
-			}
-		};
-
-		peerConnection.ontrack = (event) => {
-			document.getElementById("remoteVideo").srcObject = event.streams[0];
-		};
-
-		navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-			.then((stream) => {
-				document.getElementById("localVideo").srcObject = stream;
-				stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
-				return peerConnection.createOffer();
-			})
-			.then(offer => peerConnection.setLocalDescription(offer))
-			.then(() => sendMessage({ type: "offer", offer: peerConnection.localDescription }))
-			.catch(error => console.error("Error starting call:", error));
-	}
-}
-
-function handleICECandidate(message) {
-	if (!peerConnection) {
-		console.warn("peerConnection is not initialized yet. Skipping ICE candidate.");
-		return;
-	}
-	peerConnection.addIceCandidate(new RTCIceCandidate(message.candidate))
-		.catch(error => console.error("Error adding ICE candidate:", error));
-}
-
-function handleOffer(message) {
-	if (!peerConnection) {
-		peerConnection = new RTCPeerConnection(iceServers);
-		peerConnection.onicecandidate = (event) => {
-			if (event.candidate) {
-				sendMessage({ type: "ice-candidate", candidate: event.candidate });
-			}
-		};
-		peerConnection.ontrack = (event) => {
-			document.getElementById("remoteVideo").srcObject = event.streams[0];
-		};
-	}
-
-	peerConnection.setRemoteDescription(new RTCSessionDescription(message.offer))
-		.then(() => navigator.mediaDevices.getUserMedia({ video: true, audio: true }))
-		.then((stream) => {
-			document.getElementById("localVideo").srcObject = stream;
-			stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
-			return peerConnection.createAnswer();
-		})
-		.then(answer => peerConnection.setLocalDescription(answer))
-		.then(() => sendMessage({ type: "answer", answer: peerConnection.localDescription }))
-		.catch(error => console.error("Error handling offer:", error));
-}
-async function handleAnswer(answer) {
-	await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-}
-
-function endCall() {
-	if (peerConnection) {
-		peerConnection.close();
-		peerConnection = null;
-	}
-	if (localStream) {
-		localStream.getTracks().forEach(track => track.stop());
-	}
-	document.getElementById("video-call-container").style.display = "none";
-}
-
-document.getElementById("startCallBtn").addEventListener("click", startCall);
-
 
 function addFriend() {
 	let name = prompt("Enter the name");
